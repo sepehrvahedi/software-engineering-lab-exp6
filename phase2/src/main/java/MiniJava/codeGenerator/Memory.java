@@ -2,11 +2,6 @@ package MiniJava.codeGenerator;
 
 import java.util.ArrayList;
 
-/**
- * Created by mohammad hosein on 6/27/2015.
- */
-package MiniJava.codeGenerator;
-
 import java.util.ArrayList;
 
 /**

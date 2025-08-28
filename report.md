@@ -125,14 +125,23 @@ switch-case بزرگ برای تبدیل نوع توکن‌ها به سلسله 
 ### ۸. ده بوی بد در پروژه MiniJava
 
 ۱. **Long Method** - متد `statusOfMember()` در کلاس `ClassDiagram` (خطوط ۴۵-۶۷)
+
 ۲. **Large Class** - interface `LexicalAnalyzer` (کل کلاس)  
+
 ۳. **Long Parameter List** - تعریف کلاس `ClassDiagram` (خطوط ۱۲-۱۴)
+
 ۴. **Switch Statements** - متد `getTokensOfPhase2Files()` در `LexicalAnalyzer` (خطوط ۱۵۱-۳۳۱)
+
 ۵. **Duplicate Code** - بررسی `allClasses.contains()` در کلاس `ClassDiagram`
+
 ۶. **Data Class** - کلاس `DependencyEdge` (کل کلاس)
+
 ۷. **Comments** - کامنت بی‌فایده در `DiagramGetter.zoomAndRepaint()` (خط ۴۴)
+
 ۸. **Dead Code** - متغیر `Graphics graphics` در `DiagramGetter.init()` (خط ۳۳)
+
 ۹. **Feature Envy** - متد `equals()` در کلاس `ClassConstructor` (خطوط ۶۰-۶۷)
+
 ۱۰. **Message Chains** - زنجیره‌های `getValueType().statusOfMember()` در کلاس `ClassAttribute`
 
 ### ۹. پلاگین Formatter

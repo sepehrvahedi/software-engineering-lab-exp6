@@ -1,12 +1,12 @@
 package graph;
 
 import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.stream.Collectors;
+import org.javatuples.Pair;
 
 public class Graph {
     @Getter
@@ -17,49 +17,64 @@ public class Graph {
     }
 
     public void resetVisits() {
-        for (Node v : this.getGraph())
-            v.setVisited(false);
+        // Inlined simple loop instead of separate method calls
+        graph.forEach(node -> node.setVisited(false));
     }
 
-    public void bfs(Node s) {
-        this.resetVisits();
+    public void bfs(Node startNode) {
+        // Inline resetVisits call since it's simple
+        graph.forEach(node -> node.setVisited(false));
 
-        Queue<Pair<Node, Integer>> nodes = new LinkedList<>();
-        nodes.add(new Pair<Node, Integer>(s, 0));
-        while (!nodes.isEmpty()) {
-            Pair<Node, Integer> front = nodes.poll();
-            Node frontNode = front.getValue0();
-            if (!frontNode.isVisited()) {
-                frontNode.setVisited(true);
-                int distance = front.getValue1();
-                frontNode.setDistance(distance);
-                nodes.addAll(frontNode.getAvailableNeighbors()
-                        .stream()
-                        .map(neighbor -> new Pair<Node, Integer>(neighbor, distance + 1))
-                        .collect(Collectors.toCollection(ArrayList::new)));
+        Queue<Pair<Node, Integer>> nodeQueue = new LinkedList<>();
+        nodeQueue.add(new Pair<>(startNode, 0));
+
+        while (!nodeQueue.isEmpty()) {
+            Pair<Node, Integer> currentPair = nodeQueue.poll();
+            Node currentNode = currentPair.getValue0();
+
+            if (!currentNode.isVisited()) {
+                currentNode.setVisited(true);
+                int currentDistance = currentPair.getValue1();
+                currentNode.setDistance(currentDistance);
+
+                // Inline the neighbor processing instead of separate method
+                nodeQueue.addAll(
+                        currentNode.getAvailableNeighbors()
+                                .stream()
+                                .map(neighbor -> new Pair<>(neighbor, currentDistance + 1))
+                                .collect(Collectors.toList())
+                );
             }
         }
     }
 
-    public void dijkstra(Node s) {
-        this.resetVisits();
+    public void dijkstra(Node startNode) {
+        // Inline resetVisits call
+        graph.forEach(node -> node.setVisited(false));
 
-        PriorityQueue<Pair<Integer, Node>> nodes = new PriorityQueue<>();
-        nodes.add(new Pair<Integer, Node>(0, s));
-        while (!nodes.isEmpty()) {
-            Pair<Integer, Node> front = nodes.poll();
-            Node frontNode = front.getValue1();
-            if (!frontNode.isVisited()) {
-                frontNode.setVisited(true);
-                int distance = front.getValue0();
-                frontNode.setDistance(distance);
-                nodes.addAll(frontNode.getAvailableWeightedNeighbors()
-                        .stream()
-                        .map(neighbor -> new Pair<Integer, Node>(neighbor.getValue1() + distance,
-                                neighbor.getValue0()))
-                        .collect(Collectors.toCollection(PriorityQueue::new)));
+        PriorityQueue<Pair<Integer, Node>> priorityQueue = new PriorityQueue<>();
+        priorityQueue.add(new Pair<>(0, startNode));
+
+        while (!priorityQueue.isEmpty()) {
+            Pair<Integer, Node> currentPair = priorityQueue.poll();
+            Node currentNode = currentPair.getValue1();
+
+            if (!currentNode.isVisited()) {
+                currentNode.setVisited(true);
+                int currentDistance = currentPair.getValue0();
+                currentNode.setDistance(currentDistance);
+
+                // Inline the weighted neighbor processing
+                priorityQueue.addAll(
+                        currentNode.getAvailableWeightedNeighbors()
+                                .stream()
+                                .map(neighbor -> new Pair<>(
+                                        neighbor.getValue1() + currentDistance,
+                                        neighbor.getValue0()
+                                ))
+                                .collect(Collectors.toList())
+                );
             }
         }
     }
-
 }

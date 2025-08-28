@@ -162,10 +162,9 @@ public class CodeGenerator {
             String methodName = symbolStack.pop();
             String className = symbolStack.pop();
             try {
-
                 Symbol s = symbolTable.get(className, methodName, next.value);
                 varType t = varType.Int;
-                switch (s.type) {
+                switch (s.getType()) {  // Changed from s.type to s.getType()
                     case Bool:
                         t = varType.Bool;
                         break;
@@ -173,19 +172,18 @@ public class CodeGenerator {
                         t = varType.Int;
                         break;
                 }
-                ss.push(new Address(s.address, t));
-
-
+                ss.push(AddressFactory.createAddress(s.getAddress(), t));  // Changed from s.address to s.getAddress()
             } catch (Exception e) {
-                ss.push(new Address(0, varType.Non));
+                ss.push(AddressFactory.createAddress(0, varType.Non));
             }
             symbolStack.push(className);
             symbolStack.push(methodName);
         } else {
-            ss.push(new Address(0, varType.Non));
+            ss.push(AddressFactory.createAddress(0, varType.Non));
         }
         symbolStack.push(next.value);
     }
+
 
     public void fpid() {
         ss.pop();

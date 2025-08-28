@@ -10,7 +10,7 @@ import MiniJava.semantic.symbol.SymbolType;
 import java.util.Stack;
 
 /**
- * Created by Alireza on 6/27/2015.
+ * Code generator with extracted methods for better readability
  */
 public class CodeGenerator {
     private Memory memory = new Memory();
@@ -21,167 +21,140 @@ public class CodeGenerator {
 
     public CodeGenerator() {
         symbolTable = new SymbolTable(memory);
-        //TODO
     }
 
     public void printMemory() {
-        memory.pintCodeBlock();
+        memory.printCodeBlock();
     }
 
     public void semanticFunction(int func, Token next) {
         Log.print("codegenerator : " + func);
         switch (func) {
-            case 0:
-                return;
-            case 1:
-                checkID();
-                break;
-            case 2:
-                pid(next);
-                break;
-            case 3:
-                fpid();
-                break;
-            case 4:
-                kpid(next);
-                break;
-            case 5:
-                intpid(next);
-                break;
-            case 6:
-                startCall();
-                break;
-            case 7:
-                call();
-                break;
-            case 8:
-                arg();
-                break;
-            case 9:
-                assign();
-                break;
-            case 10:
-                add();
-                break;
-            case 11:
-                sub();
-                break;
-            case 12:
-                mult();
-                break;
-            case 13:
-                label();
-                break;
-            case 14:
-                save();
-                break;
-            case 15:
-                _while();
-                break;
-            case 16:
-                jpf_save();
-                break;
-            case 17:
-                jpHere();
-                break;
-            case 18:
-                print();
-                break;
-            case 19:
-                equal();
-                break;
-            case 20:
-                less_than();
-                break;
-            case 21:
-                and();
-                break;
-            case 22:
-                not();
-                break;
-            case 23:
-                defClass();
-                break;
-            case 24:
-                defMethod();
-                break;
-            case 25:
-                popClass();
-                break;
-            case 26:
-                extend();
-                break;
-            case 27:
-                defField();
-                break;
-            case 28:
-                defVar();
-                break;
-            case 29:
-                methodReturn();
-                break;
-            case 30:
-                defParam();
-                break;
-            case 31:
-                lastTypeBool();
-                break;
-            case 32:
-                lastTypeInt();
-                break;
-            case 33:
-                defMain();
-                break;
+            case 0: return;
+            case 1: checkID(); break;
+            case 2: pid(next); break;
+            case 3: fpid(); break;
+            case 4: kpid(next); break;
+            case 5: intpid(next); break;
+            case 6: startCall(); break;
+            case 7: call(); break;
+            case 8: arg(); break;
+            case 9: assign(); break;
+            case 10: add(); break;
+            case 11: sub(); break;
+            case 12: mult(); break;
+            case 13: label(); break;
+            case 14: save(); break;
+            case 15: _while(); break;
+            case 16: jpf_save(); break;
+            case 17: jpHere(); break;
+            case 18: print(); break;
+            case 19: equal(); break;
+            case 20: less_than(); break;
+            case 21: and(); break;
+            case 22: not(); break;
+            case 23: defClass(); break;
+            case 24: defMethod(); break;
+            case 25: popClass(); break;
+            case 26: extend(); break;
+            case 27: defField(); break;
+            case 28: defVar(); break;
+            case 29: methodReturn(); break;
+            case 30: defParam(); break;
+            case 31: lastTypeBool(); break;
+            case 32: lastTypeInt(); break;
+            case 33: defMain(); break;
         }
     }
 
-    private void defMain() {
-        //ss.pop();
-        memory.add3AddressCode(ss.pop().num, Operation.JP, new Address(memory.getCurrentCodeBlockAddress(), varType.Address), null, null);
-        String methodName = "main";
-        String className = symbolStack.pop();
-
-        symbolTable.addMethod(className, methodName, memory.getCurrentCodeBlockAddress());
-
-        symbolStack.push(className);
-        symbolStack.push(methodName);
+    // Extracted method for type conversion
+    private varType convertSymbolTypeToVarType(SymbolType symbolType) {
+        switch (symbolType) {
+            case Bool: return varType.Bool;
+            case Int: return varType.Int;
+            default: return varType.Int;
+        }
     }
 
-    //    public void spid(Token next){
-//        symbolStack.push(next.value);
-//    }
-    public void checkID() {
-        symbolStack.pop();
-        if (ss.peek().varType == varType.Non) {
-            //TODO : error
+    // Extracted method for type validation
+    private void validateOperandTypes(Address operand1, Address operand2, varType expectedType, String operationName) {
+        if (operand1.getVarType() != expectedType || operand2.getVarType() != expectedType) {
+            ErrorHandler.printError("In " + operationName + " two operands must be " + expectedType);
         }
+    }
+
+    // Extracted method for arithmetic operations
+    private void performArithmeticOperation(Operation operation, String operationName) {
+        Address temp = AddressFactory.createAddress(memory.allocateTemp(), varType.Int);
+        Address s2 = ss.pop();
+        Address s1 = ss.pop();
+
+        validateOperandTypes(s1, s2, varType.Int, operationName);
+        memory.addInstruction(operation, s1, s2, temp);
+        ss.push(temp);
+    }
+
+    // Extracted method for symbol lookup with error handling
+    private Symbol getSymbolSafely(String className, String methodName, String symbolName) {
+        try {
+            return symbolTable.get(className, methodName, symbolName);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Refactored methods using extracted helper methods
+    public void add() {
+        performArithmeticOperation(Operation.ADD, "add");
+    }
+
+    public void sub() {
+        performArithmeticOperation(Operation.SUB, "sub");
+    }
+
+    public void mult() {
+        performArithmeticOperation(Operation.MULT, "mult");
     }
 
     public void pid(Token next) {
         if (symbolStack.size() > 1) {
             String methodName = symbolStack.pop();
             String className = symbolStack.pop();
-            try {
-                Symbol s = symbolTable.get(className, methodName, next.value);
-                varType t = varType.Int;
-                switch (s.getType()) {  // Changed from s.type to s.getType()
-                    case Bool:
-                        t = varType.Bool;
-                        break;
-                    case Int:
-                        t = varType.Int;
-                        break;
-                }
-                ss.push(AddressFactory.createAddress(s.getAddress(), t));  // Changed from s.address to s.getAddress()
-            } catch (Exception e) {
+
+            Symbol symbol = getSymbolSafely(className, methodName, next.value);
+
+            if (symbol != null) {
+                varType type = convertSymbolTypeToVarType(symbol.getType());
+                ss.push(AddressFactory.createAddress(symbol.getAddress(), type));
+            } else {
                 ss.push(AddressFactory.createAddress(0, varType.Non));
             }
+
             symbolStack.push(className);
             symbolStack.push(methodName);
         } else {
             ss.push(AddressFactory.createAddress(0, varType.Non));
         }
         symbolStack.push(next.value);
+    }
+
+    private void defMain() {
+        memory.updateInstruction(ss.pop().getNum(), Operation.JP,
+                AddressFactory.createAddress(memory.getCurrentCodeBlockAddress(), varType.Address), null, null);
+
+        String methodName = "main";
+        String className = symbolStack.pop();
+        symbolTable.addMethod(className, methodName, memory.getCurrentCodeBlockAddress());
+
+        symbolStack.push(className);
+        symbolStack.push(methodName);
+    }
+
+    public void checkID() {
+        symbolStack.pop();
+        if (ss.peek().varType == varType.Non) {
+            //TODO : error
+        }
     }
 
 
@@ -294,41 +267,6 @@ public class CodeGenerator {
 //            d.printStackTrace();
 //        }
         memory.add3AddressCode(Operation.ASSIGN, s1, s2, null);
-    }
-
-    public void add() {
-        Address temp = new Address(memory.getTemp(), varType.Int);
-        Address s2 = ss.pop();
-        Address s1 = ss.pop();
-
-        if (s1.varType != varType.Int || s2.varType != varType.Int) {
-            ErrorHandler.printError("In add two operands must be integer");
-        }
-        memory.add3AddressCode(Operation.ADD, s1, s2, temp);
-        ss.push(temp);
-    }
-
-    public void sub() {
-        Address temp = new Address(memory.getTemp(), varType.Int);
-        Address s2 = ss.pop();
-        Address s1 = ss.pop();
-        if (s1.varType != varType.Int || s2.varType != varType.Int) {
-            ErrorHandler.printError("In sub two operands must be integer");
-        }
-        memory.add3AddressCode(Operation.SUB, s1, s2, temp);
-        ss.push(temp);
-    }
-
-    public void mult() {
-        Address temp = new Address(memory.getTemp(), varType.Int);
-        Address s2 = ss.pop();
-        Address s1 = ss.pop();
-        if (s1.varType != varType.Int || s2.varType != varType.Int) {
-            ErrorHandler.printError("In mult two operands must be integer");
-        }
-        memory.add3AddressCode(Operation.MULT, s1, s2, temp);
-//        memory.saveMemory();
-        ss.push(temp);
     }
 
     public void label() {

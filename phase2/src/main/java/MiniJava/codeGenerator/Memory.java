@@ -2,8 +2,6 @@ package MiniJava.codeGenerator;
 
 import java.util.ArrayList;
 
-import java.util.ArrayList;
-
 /**
  * Memory management class with separated query and modifier methods
  */
